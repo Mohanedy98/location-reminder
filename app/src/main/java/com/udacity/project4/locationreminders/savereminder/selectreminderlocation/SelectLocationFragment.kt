@@ -3,14 +3,12 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.Navigation
 import com.google.android.gms.location.LocationServices
@@ -23,6 +21,7 @@ import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
+import com.udacity.project4.utils.PermissionUtils
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 import java.util.*
@@ -95,19 +94,20 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
 
 
-    @SuppressLint("MissingPermission")
-    val requestPermissionLauncher = registerForActivityResult(
+    private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { isGranted ->
-        if (isGranted[Manifest.permission.ACCESS_FINE_LOCATION] == true
-            && isGranted[Manifest.permission.ACCESS_COARSE_LOCATION] == true) {
+        val requiredPermissionsForQOrLater =
+            isGranted[Manifest.permission.ACCESS_FINE_LOCATION] == true
+                    && isGranted[Manifest.permission.ACCESS_COARSE_LOCATION] == true && isGranted[Manifest.permission.ACCESS_BACKGROUND_LOCATION] == true
+
+        val requiredPermissionsBeforeQ =
+            isGranted[Manifest.permission.ACCESS_FINE_LOCATION] == true
+                    && isGranted[Manifest.permission.ACCESS_COARSE_LOCATION] == true && !PermissionUtils.runningQOrLater
+        if (requiredPermissionsBeforeQ || requiredPermissionsForQOrLater) {
             moveCameraToUserLocation()
         } else {
-            Toast.makeText(
-                requireContext(),
-                "You must enable your location permission to show your current location",
-                Toast.LENGTH_SHORT
-            ).show()
+            PermissionUtils.showSettingsSnackBar(binding.root)
         }
     }
 
@@ -170,21 +170,15 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
 
     private fun enableMyLocation() {
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                requireContext(),
+        if (!PermissionUtils.foregroundAndBackgroundLocationPermissionApproved(requireContext())) {
+            var permissions = arrayOf<String>(
+                Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissionLauncher.launch(
-                arrayOf<String>(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-
-                )
             )
+            if (PermissionUtils.runningQOrLater) {
+                permissions += Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            }
+            requestPermissionLauncher.launch(permissions)
 
             return
         }

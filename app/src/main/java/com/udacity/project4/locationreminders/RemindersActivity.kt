@@ -32,16 +32,6 @@ class RemindersActivity : AppCompatActivity() {
                 (nav_host_fragment as NavHostFragment).navController.popBackStack()
                 return true
             }
-            R.id.logout ->{
-                AuthUI.getInstance().signOut(this)
-                Toast.makeText(this, "You are signed out", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, AuthenticationActivity::class.java) // New activity
-
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                startActivity(intent)
-                finish()
-                return  true
-            }
         }
         return super.onOptionsItemSelected(item)
     }

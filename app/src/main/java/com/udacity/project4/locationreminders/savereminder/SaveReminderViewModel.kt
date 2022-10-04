@@ -14,6 +14,7 @@ import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import kotlinx.coroutines.launch
+import java.util.*
 
 class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSource) :
     BaseViewModel(app) {
@@ -40,10 +41,12 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
     /**
      * Validate the entered data then saves the reminder data to the DataSource
      */
-    fun validateAndSaveReminder(reminderData: ReminderDataItem) {
+    fun validateAndSaveReminder(reminderData: ReminderDataItem) : Boolean{
         if (validateEnteredData(reminderData)) {
             saveReminder(reminderData)
+            return  true
         }
+        return  false
     }
 
     /**
@@ -89,11 +92,17 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
         latitude.value = null
         longitude.value = null
         selectedPOI.value = poi
+
+        reminderSelectedLocationStr.value = poi.name
     }
 
     fun selectCustomLocation(latLng: LatLng) {
         selectedPOI.value = null
         latitude.value = latLng.latitude
         longitude.value = latLng.longitude
+
+        reminderSelectedLocationStr.value =  String.format(
+            Locale.getDefault(), "Lat: %1$.5f, Long: %2$.5f", latLng.latitude, latLng.longitude
+        )
     }
 }
