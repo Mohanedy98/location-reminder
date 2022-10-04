@@ -22,8 +22,7 @@ import org.koin.dsl.module
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 //END TO END test to black box test the app
-class RemindersActivityTest :
-    AutoCloseKoinTest() {// Extended Koin Test - embed autoclose @after method to close Koin after every test
+class RemindersActivityTest  {// Extended Koin Test - embed autoclose @after method to close Koin after every test
 
     private lateinit var repository: ReminderDataSource
     private lateinit var appContext: Application
@@ -57,7 +56,7 @@ class RemindersActivityTest :
             modules(listOf(myModule))
         }
         //Get our real repository
-        repository = get()
+//        repository = get()
 
         //clear the data to start fresh
         runBlocking {
