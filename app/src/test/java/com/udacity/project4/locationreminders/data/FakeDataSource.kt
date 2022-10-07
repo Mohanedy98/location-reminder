@@ -17,17 +17,23 @@ class FakeDataSource(private val reminders: MutableList<ReminderDTO>? = mutableL
         if (shouldReturnError) {
             return Result.Error("Test exception")
         }
-        reminders?.let { return Result.Success(ArrayList(it)) }
-        return Result.Error(
-            "Reminders not found"
-        )
+        reminders?.let {
+            return Result.Success(ArrayList(it))
+        }
+        return Result.Success(ArrayList())
     }
 
     override suspend fun saveReminder(reminder: ReminderDTO) {
+        if (shouldReturnError) {
+            throw Error("Test exception")
+        }
         reminders?.add(reminder)
     }
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
+        if (shouldReturnError) {
+            return Result.Error("Test exception")
+        }
         reminders?.let {
             val reminder = it.first { reminderDTO -> reminderDTO.id == id }
             return Result.Success(reminder)

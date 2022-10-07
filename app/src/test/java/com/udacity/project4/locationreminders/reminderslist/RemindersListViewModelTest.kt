@@ -107,7 +107,7 @@ class RemindersListViewModelTest {
 
         MatcherAssert.assertThat(
             remindersListViewModel.showSnackBar.getOrAwaitValue(),
-            CoreMatchers.notNullValue()
+            CoreMatchers.`is`("Test exception")
         )
 
     }

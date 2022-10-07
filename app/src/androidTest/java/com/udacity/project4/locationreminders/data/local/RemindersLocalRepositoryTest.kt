@@ -76,11 +76,10 @@ class RemindersLocalRepositoryTest {
 
     @Test
     fun unknownId_returnsError() = runTest {
-
-
         val loaded = remindersLocalRepositoryTest.getReminder("sdafsdmvaksvm")
 
-        assertThat(loaded as Result.Error, CoreMatchers.notNullValue())
-
+        assertThat(loaded, CoreMatchers.notNullValue())
+        loaded as Result.Error
+        assertThat(loaded.message, `is`("Reminder not found!"))
     }
 }
