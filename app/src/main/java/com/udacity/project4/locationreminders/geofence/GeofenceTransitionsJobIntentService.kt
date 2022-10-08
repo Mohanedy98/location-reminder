@@ -47,7 +47,7 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
             Log.e(TAG, geofencingEvent.errorCode.toString())
             return
         }
-        geofencingEvent.triggeringGeofences!![0].requestId
+
         if (geofencingEvent.geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
             Log.v(TAG, "Geofence Entered")
             when {

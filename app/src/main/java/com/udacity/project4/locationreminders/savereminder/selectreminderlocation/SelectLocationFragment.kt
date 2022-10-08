@@ -25,13 +25,14 @@ import com.udacity.project4.utils.PermissionUtils
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
 
 
 class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     //Use Koin to get the view model of the SaveReminder
-    override val _viewModel: SaveReminderViewModel by  sharedViewModel()
+    override val _viewModel: SaveReminderViewModel by sharedViewModel()
     private lateinit var binding: FragmentSelectLocationBinding
     private lateinit var map: GoogleMap
 
@@ -98,14 +99,10 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { isGranted ->
-        val requiredPermissionsForQOrLater =
-            isGranted[Manifest.permission.ACCESS_FINE_LOCATION] == true
-                    && isGranted[Manifest.permission.ACCESS_COARSE_LOCATION] == true && isGranted[Manifest.permission.ACCESS_BACKGROUND_LOCATION] == true
-
-        val requiredPermissionsBeforeQ =
+        val requiredPermissionsGranted =
             isGranted[Manifest.permission.ACCESS_FINE_LOCATION] == true
                     && isGranted[Manifest.permission.ACCESS_COARSE_LOCATION] == true && !PermissionUtils.runningQOrLater
-        if (requiredPermissionsBeforeQ || requiredPermissionsForQOrLater) {
+        if (requiredPermissionsGranted) {
             moveCameraToUserLocation()
         } else {
             PermissionUtils.showSettingsSnackBar(binding.root)
@@ -172,15 +169,11 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     private fun enableMyLocation() {
         if (!PermissionUtils.foregroundAndBackgroundLocationPermissionApproved(requireContext())) {
-            var permissions = arrayOf<String>(
+            val permissions = arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             )
-            if (PermissionUtils.runningQOrLater) {
-                permissions += Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            }
             requestPermissionLauncher.launch(permissions)
-
             return
         }
         moveCameraToUserLocation()

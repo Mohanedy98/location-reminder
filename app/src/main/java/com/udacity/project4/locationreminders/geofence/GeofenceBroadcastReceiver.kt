@@ -37,7 +37,6 @@ class GeofenceBroadcastReceiver : BroadcastReceiver(), CoroutineScope {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == ACTION_GEOFENCE_EVENT) {
             GeofenceTransitionsJobIntentService.enqueueWork(context, intent)
-
         }
     }
 }
