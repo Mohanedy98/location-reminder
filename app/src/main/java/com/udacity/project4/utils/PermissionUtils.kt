@@ -37,11 +37,24 @@ object PermissionUtils {
         return foregroundApproved && backgroundApproved
     }
 
+    fun foregroundLocationPermissionApproved(context: Context): Boolean {
+        val foregroundApproved =
+            (PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )) ||    (PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ))
+
+        return foregroundApproved
+    }
+
     fun showSettingsSnackBar(view: View) {
         Snackbar.make(
             view,
             R.string.permission_denied_explanation,
-            Snackbar.LENGTH_INDEFINITE
+            Snackbar.LENGTH_LONG
         )
             .setAction(R.string.settings) {
                 startActivity(

@@ -2,11 +2,13 @@ package com.udacity.project4.locationreminders.savereminder
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.IntentSender
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -36,7 +38,7 @@ class SaveReminderFragment : BaseFragment() {
     override val _viewModel: SaveReminderViewModel by sharedViewModel()
     private lateinit var binding: FragmentSaveReminderBinding
     private lateinit var geofencingClient: GeofencingClient
-    private  var currentReminder : ReminderDataItem? = null
+    private var currentReminder: ReminderDataItem? = null
     private val geofencePendingIntent by lazy {
         val intent =
             Intent(requireActivity().applicationContext, GeofenceBroadcastReceiver::class.java)
@@ -96,7 +98,7 @@ class SaveReminderFragment : BaseFragment() {
             val longitude =
                 _viewModel.longitude.value ?: _viewModel.selectedPOI.value?.latLng?.longitude
 
-             currentReminder = ReminderDataItem(
+            currentReminder = ReminderDataItem(
                 title,
                 description,
                 location,
@@ -117,6 +119,7 @@ class SaveReminderFragment : BaseFragment() {
         if (foregroundAndBackgroundLocationPermissionApproved(requireContext())) {
             checkDeviceLocationSettingsAndStartGeofence(reminderItem)
         } else {
+
             requestForegroundAndBackgroundLocationPermissions()
         }
     }
@@ -147,9 +150,26 @@ class SaveReminderFragment : BaseFragment() {
         if (!isPermissionsGranted) {
             PermissionUtils.showSettingsSnackBar(binding.root)
         } else {
-           currentReminder?.let {
-               checkDeviceLocationSettingsAndStartGeofence(it)
-           }
+            currentReminder?.let {
+                checkDeviceLocationSettingsAndStartGeofence(it)
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == REQUEST_TURN_DEVICE_LOCATION_ON) {
+            if (resultCode == Activity.RESULT_OK) {
+                currentReminder?.let {
+                    checkDeviceLocationSettingsAndStartGeofence(it)
+                }
+                return
+            }
+            Snackbar.make(
+                binding.root,
+                R.string.location_required_error, Snackbar.LENGTH_LONG
+            ).setAction(android.R.string.ok) {
+                startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+            }.show()
         }
     }
 
@@ -182,26 +202,16 @@ class SaveReminderFragment : BaseFragment() {
                         "Error getting location settings resolution: " + sendEx.message
                     )
                 }
-            } else {
-                Snackbar.make(
-                    binding.root,
-                    R.string.location_required_error, Snackbar.LENGTH_INDEFINITE
-                ).setAction(android.R.string.ok) {
-                    checkDeviceLocationSettingsAndStartGeofence(reminderItem)
-                }.show()
             }
         }
-        locationSettingsResponseTask.addOnCompleteListener {
-            if (it.isSuccessful) {
-                addGeofenceForReminder(reminderItem)
-            }
+
+        locationSettingsResponseTask.addOnSuccessListener {
+            addGeofenceForReminder(reminderItem)
         }
     }
 
     @SuppressLint("MissingPermission")
     private fun addGeofenceForReminder(reminder: ReminderDataItem) {
-
-
         val geofence = Geofence.Builder()
             .setRequestId(reminder.id)
             .setCircularRegion(
