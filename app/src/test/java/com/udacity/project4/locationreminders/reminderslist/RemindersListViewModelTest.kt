@@ -11,6 +11,7 @@ import getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.pauseDispatcher
 import kotlinx.coroutines.test.resumeDispatcher
+import kotlinx.coroutines.test.runBlockingTest
 import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
 import org.hamcrest.Matchers.greaterThan
@@ -36,32 +37,7 @@ class RemindersListViewModelTest {
     fun setupViewModel() {
         stopKoin()
         val application = ApplicationProvider.getApplicationContext() as Application
-        fakeDataSource = FakeDataSource(
-            mutableListOf(
-                ReminderDTO(
-                    "Test Title",
-                    "Test Description",
-                    "Test Location",
-                    31.5,
-                    31.5,
-                ),
-                ReminderDTO(
-                    "Test Title",
-                    "Test Description",
-                    "Test Location",
-                    31.5,
-                    31.5,
-                ),
-                ReminderDTO(
-                    "Test Title",
-                    "Test Description",
-                    "Test Location",
-                    31.5,
-                    31.5,
-                ),
-            )
-        )
-
+        fakeDataSource = FakeDataSource()
         remindersListViewModel = RemindersListViewModel(application, fakeDataSource)
     }
 
@@ -85,7 +61,36 @@ class RemindersListViewModelTest {
     }
 
     @Test
-    fun loadReminders_populateRemindersList() {
+    fun loadReminders_populateRemindersList() = runBlockingTest {
+
+        fakeDataSource.saveReminder(
+            ReminderDTO(
+                "Test Title",
+                "Test Description",
+                "Test Location",
+                31.5,
+                31.5,
+            ),
+        )
+        fakeDataSource.saveReminder(
+            ReminderDTO(
+                "Test Title",
+                "Test Description",
+                "Test Location",
+                31.5,
+                31.5,
+            ),
+        )
+        fakeDataSource.saveReminder(
+            ReminderDTO(
+                "Test Title",
+                "Test Description",
+                "Test Location",
+                31.5,
+                31.5,
+            ),
+        )
+
         remindersListViewModel.loadReminders()
 
         MatcherAssert.assertThat(

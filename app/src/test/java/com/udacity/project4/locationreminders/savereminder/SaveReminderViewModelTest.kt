@@ -40,32 +40,7 @@ class SaveReminderViewModelTest {
     fun setupViewModel() {
         stopKoin()
         val application = ApplicationProvider.getApplicationContext() as Application
-        fakeDataSource = FakeDataSource(
-            mutableListOf(
-                ReminderDTO(
-                    "Test Title",
-                    "Test Description",
-                    "Test Location",
-                    31.5,
-                    31.5,
-                ),
-                ReminderDTO(
-                    "Test Title",
-                    "Test Description",
-                    "Test Location",
-                    31.5,
-                    31.5,
-                ),
-                ReminderDTO(
-                    "Test Title",
-                    "Test Description",
-                    "Test Location",
-                    31.5,
-                    31.5,
-                ),
-            )
-        )
-
+        fakeDataSource = FakeDataSource()
         saveReminderViewModel = SaveReminderViewModel(application, fakeDataSource)
     }
 
