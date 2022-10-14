@@ -23,9 +23,7 @@ import com.udacity.project4.databinding.FragmentSelectLocationBinding
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.utils.PermissionUtils
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
-import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
-import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
 
 
@@ -49,7 +47,8 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(true)
 
-        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        val mapFragment =
+            childFragmentManager.findFragmentById(R.id.map_container) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
 
@@ -101,7 +100,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     ) { isGranted ->
         val requiredPermissionsGranted =
             isGranted[Manifest.permission.ACCESS_FINE_LOCATION] == true
-                    && isGranted[Manifest.permission.ACCESS_COARSE_LOCATION] == true && !PermissionUtils.runningQOrLater
+                    || isGranted[Manifest.permission.ACCESS_COARSE_LOCATION] == true
         if (requiredPermissionsGranted) {
             moveCameraToUserLocation()
         } else {
@@ -168,7 +167,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
 
     private fun enableMyLocation() {
-        if (!PermissionUtils.foregroundAndBackgroundLocationPermissionApproved(requireContext())) {
+        if (!PermissionUtils.foregroundLocationPermissionApproved(requireContext())) {
             val permissions = arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
