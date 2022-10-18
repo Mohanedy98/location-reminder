@@ -4,8 +4,9 @@ import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 
-class FakeAndroidDataSource(private val reminders: MutableList<ReminderDTO>? = mutableListOf()) :
+class FakeAndroidDataSource() :
     ReminderDataSource {
+    private val reminders: MutableList<ReminderDTO> = mutableListOf()
     private var shouldReturnError = false
 
     fun setReturnError(value: Boolean) {
@@ -16,28 +17,34 @@ class FakeAndroidDataSource(private val reminders: MutableList<ReminderDTO>? = m
         if (shouldReturnError) {
             return Result.Error("Test exception")
         }
-        reminders?.let { return Result.Success(ArrayList(it)) }
-        return Result.Error(
-            "Reminders not found"
-        )
+        return Result.Success(ArrayList(reminders))
     }
 
     override suspend fun saveReminder(reminder: ReminderDTO) {
-        reminders?.add(reminder)
+        if (shouldReturnError) {
+            throw Error("Test exception")
+        }
+        reminders.add(reminder)
     }
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
-        reminders?.let {
-            val reminder = it.first { reminderDTO -> reminderDTO.id == id }
-            return Result.Success(reminder)
+        if (shouldReturnError) {
+            return Result.Error("Test exception")
         }
-        return Result.Error(
-            "Reminder not found"
-        )
+        return try {
+
+            val reminder = reminders.first { reminderDTO -> reminderDTO.id == id }
+            Result.Success(reminder)
+
+        }catch (e: Exception){
+            Result.Error(
+                "Reminder not found"
+            )
+        }
     }
 
     override suspend fun deleteAllReminders() {
-        reminders?.clear()
+        reminders.clear()
     }
 
 

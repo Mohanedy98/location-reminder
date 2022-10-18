@@ -100,3 +100,10 @@ fun DataBindingIdlingResource.monitorActivity(
         this.activity = it
     }
 }
+
+
+fun <T : Fragment>  DataBindingIdlingResource.monitorFragment(fragmentScenario: FragmentScenario<T>) {
+    fragmentScenario.onFragment { fragment ->
+        this.activity = fragment.requireActivity()
+    }
+}
