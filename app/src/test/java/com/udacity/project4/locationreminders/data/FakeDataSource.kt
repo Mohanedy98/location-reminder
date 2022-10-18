@@ -25,24 +25,27 @@ class FakeDataSource :
         if (shouldReturnError) {
             throw Error("Test exception")
         }
-        reminders?.add(reminder)
+        reminders.add(reminder)
     }
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
         if (shouldReturnError) {
             return Result.Error("Test exception")
         }
-        reminders?.let {
-            val reminder = it.first { reminderDTO -> reminderDTO.id == id }
-            return Result.Success(reminder)
+        return try {
+
+            val reminder = reminders.first { reminderDTO -> reminderDTO.id == id }
+            Result.Success(reminder)
+
+        }catch (e: Exception){
+            Result.Error(
+                "Reminder not found"
+            )
         }
-        return Result.Error(
-            "Reminder not found"
-        )
     }
 
     override suspend fun deleteAllReminders() {
-        reminders?.clear()
+        reminders.clear()
     }
 
 
